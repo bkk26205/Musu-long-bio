@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Musu ✿ Bio Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;700&family=Bebas+Neue&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a18;
+  --bg2:#111128;
+  --bg3:#18183a;
+  --bg4:#222250;
+  --bd:rgba(255,105,180,.14);
+  --bd2:rgba(255,105,180,.3);
+  --bd3:rgba(255,105,180,.5);
+  --acc:#ff69b4;
+  --acc2:#da70d6;
+  --acc3:#ffb6c1;
+  --glow:rgba(255,105,180,.4);
+  --glow2:rgba(218,112,214,.3);
+  --txt:#f8f0ff;
+  --txt2:#c9b6e0;
+  --txt3:#8a6e9e;
+  --suc:#c084fc;
+  --err:#ff6688;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:'Quicksand',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background-image:radial-gradient(circle at 20% 50%, rgba(255,105,180,.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(218,112,214,.03) 0%, transparent 60%);
+  pointer-events:none}
+
+.topbar{position:sticky;top:0;z-index:300;background:rgba(10,10,24,.94);
+  backdrop-filter:blur(18px);border-bottom:1px solid var(--bd);
+  padding:9px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.brand{display:flex;align-items:center;gap:9px;flex:1;min-width:0}
+.brand-icon{width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 14px var(--glow)}
+.brand-name{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:2px;
+  background:linear-gradient(90deg,var(--acc),var(--acc2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-btns{display:flex;gap:6px;flex-shrink:0}
+.tbtn{display:flex;align-items:center;gap:5px;padding:6px 11px;border-radius:20px;
+  font-family:'Quicksand',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;
+  text-decoration:none;border:none;transition:.2s;white-space:nowrap}
+.tbtn-how{background:rgba(255,105,180,.1);border:1px solid var(--bd2);color:var(--acc)}
+.tbtn:hover{opacity:.8;transform:translateY(-1px)}
+
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:300;
+  background:rgba(10,10,24,.96);backdrop-filter:blur(18px);
+  border-top:1px solid var(--bd);display:flex;
+  padding-bottom:env(safe-area-inset-bottom)}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:7px 4px;gap:3px;color:var(--txt3);
+  font-size:.9rem;border:none;background:none;cursor:pointer;
+  font-family:'Quicksand',sans-serif;transition:.2s}
+.bnav-item .nav-lbl{font-size:.52rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}
+.bnav-item.active{color:var(--acc)}
+.bnav-item.active .nav-pip{background:rgba(255,105,180,.15);padding:4px 14px;border-radius:20px}
+
+.main{max-width:480px;margin:0 auto;
+  padding:14px 13px calc(68px + env(safe-area-inset-bottom));
+  position:relative;z-index:1}
+
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:20px;
+  padding:15px;margin-bottom:13px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--acc),var(--acc2),transparent);opacity:.35}
+
+.sec-label{display:flex;align-items:center;gap:7px;font-size:.63rem;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-bottom:11px}
+.sec-label svg{color:var(--acc);flex-shrink:0}
+.badge{margin-left:auto;font-size:.55rem;padding:2px 8px;
+  background:rgba(255,105,180,.14);border:1px solid var(--bd2);
+  border-radius:20px;color:var(--acc);white-space:nowrap}
+.badge-ok{background:rgba(192,132,252,.08)!important;border-color:rgba(192,132,252,.25)!important;color:var(--suc)!important}
+
+.page{display:none}
+.page.active{display:block;animation:fadeUp .22s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+
+.inp{width:100%;padding:11px 13px;background:rgba(0,0,0,.42);border:1px solid var(--bd);
+  border-radius:12px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:.82rem;transition:.2s}
+.inp:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 2px rgba(255,105,180,.12)}
+.inp::placeholder{color:var(--txt3)}
+.textarea-bio{width:100%;padding:11px 13px;background:rgba(0,0,0,.48);border:1px solid var(--bd);
+  border-radius:12px;color:var(--txt);font-family:'JetBrains Mono',monospace;
+  font-size:.8rem;line-height:1.6;resize:vertical;min-height:100px;transition:.2s}
+.textarea-bio:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 2px rgba(255,105,180,.12)}
+.char-bar{display:flex;justify-content:flex-end;margin-top:4px;
+  font-size:.62rem;color:var(--txt3);font-family:'JetBrains Mono',monospace}
+
+.token-row{display:flex;gap:7px;margin-bottom:10px}
+.token-row .inp{flex:1}
+.paste-btn{padding:11px 13px;border-radius:12px;background:rgba(255,105,180,.1);
+  border:1px solid var(--bd2);color:var(--acc);cursor:pointer;transition:.2s;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.paste-btn:hover{background:rgba(255,105,180,.2)}
+
+.info-box{background:rgba(0,0,0,.35);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-top:10px}
+.info-row{display:flex;justify-content:space-between;align-items:center;
+  padding:5px 0;border-bottom:1px solid var(--bd)}
+.info-row:last-child{border-bottom:none}
+.info-key{color:var(--txt3);font-size:.72rem}
+.info-val{color:var(--suc);font-weight:700;font-size:.8rem;font-family:'JetBrains Mono',monospace}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;
+  padding:12px;border:none;border-radius:30px;font-family:'Quicksand',sans-serif;
+  font-size:.92rem;font-weight:700;letter-spacing:.7px;cursor:pointer;transition:.25s;
+  text-transform:uppercase}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;
+  box-shadow:0 0 18px rgba(255,105,180,.35)}
+.btn-primary:hover{box-shadow:0 0 28px rgba(255,105,180,.5);transform:translateY(-1px)}
+.btn-secondary{background:rgba(0,0,0,.38);color:var(--txt2);border:1px solid var(--bd2)}
+.btn-secondary:hover{border-color:var(--acc);color:var(--acc)}
+.btn-success{background:linear-gradient(135deg,#c084fc,#e9d5ff);color:#1a1a2e;font-weight:800;
+  box-shadow:0 0 18px rgba(192,132,252,.28)}
+.btn-create-site{background:linear-gradient(135deg,#c084fc,#e9d5ff);color:#1a1a2e;font-weight:800;
+  box-shadow:0 0 18px rgba(192,132,252,.28);margin-top:10px}
+
+.fmt-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.fmt-btn{padding:6px 12px;border-radius:20px;background:var(--bg3);border:1px solid var(--bd);
+  color:var(--txt2);font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+  cursor:pointer;transition:.15s}
+.fmt-btn:hover{border-color:var(--acc);color:var(--acc);background:rgba(255,105,180,.1)}
+
+.color-grid{display:flex;flex-wrap:wrap;gap:7px}
+.color-dot{width:28px;height:28px;border-radius:12px;border:1.5px solid rgba(255,255,255,.1);
+  cursor:pointer;transition:.15s;flex-shrink:0}
+.color-dot:hover{transform:scale(1.2);border-color:rgba(255,255,255,.5)}
+
+.grad-list{display:flex;flex-wrap:wrap;gap:6px}
+.grad-chip{padding:5px 11px;border-radius:20px;background:var(--bg3);border:1px solid var(--bd);
+  font-family:'Quicksand',sans-serif;font-size:.74rem;font-weight:600;color:var(--txt2);
+  cursor:pointer;transition:.15s}
+.grad-chip:hover{border-color:var(--acc);color:var(--acc)}
+
+.vbadge-row{display:flex;flex-wrap:wrap;gap:6px}
+.vb-chip{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:20px;
+  background:var(--bg3);border:1px solid var(--bd);cursor:pointer;transition:.15s}
+.vb-chip:hover{border-color:var(--acc)}
+.vb-chip .vlbl{font-size:.64rem;color:var(--txt3);font-family:'Quicksand',sans-serif}
+
+.bio-preview{background:rgba(0,0,0,.5);border:1px solid rgba(255,105,180,.2);border-radius:12px;
+  padding:13px;min-height:70px;max-height:150px;overflow-y:auto;
+  font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.7;
+  white-space:pre-wrap;word-break:break-word}
+.bio-empty{color:var(--txt3);font-style:italic;font-size:.74rem;text-align:center}
+
+.tpl-list{display:flex;flex-direction:column;gap:10px}
+.tpl-card{background:var(--bg3);border:1px solid var(--bd);border-radius:16px;
+  padding:12px;cursor:pointer;transition:.2s;position:relative;overflow:hidden}
+.tpl-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--acc),var(--acc2));border-radius:3px 0 0 3px}
+.tpl-card:hover{border-color:var(--acc);transform:translateY(-1px)}
+.tpl-name{font-size:.7rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+  color:var(--acc);margin-bottom:7px;padding-left:9px}
+.tpl-preview{font-size:.8rem;line-height:1.65;padding-left:9px;
+  white-space:pre-wrap;word-break:break-word;margin-bottom:5px;max-height:80px;overflow-y:auto}
+.tpl-tag{display:inline-block;margin-left:9px;font-size:.55rem;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;color:var(--txt3);
+  background:rgba(0,0,0,.4);padding:2px 7px;border-radius:20px;border:1px solid var(--bd)}
+
+#toast{position:fixed;top:-55px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;
+  padding:9px 22px;border-radius:40px;font-family:'Quicksand',sans-serif;
+  font-weight:700;font-size:.86rem;z-index:9999;
+  transition:top .38s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;
+  box-shadow:0 8px 22px rgba(255,105,180,.4)}
+
+.modal-bg{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.88);
+  backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
+  padding:16px;opacity:0;visibility:hidden;transition:.28s}
+.modal-bg.show{opacity:1;visibility:visible}
+.modal-box{background:var(--bg3);border:1px solid var(--bd2);border-radius:24px;
+  padding:22px;max-width:370px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.8);
+  transform:translateY(16px);transition:.32s}
+.modal-bg.show .modal-box{transform:translateY(0)}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:2px;
+  text-align:center;margin-bottom:4px;
+  background:linear-gradient(90deg,var(--acc3),var(--acc));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.modal-sub{color:var(--txt3);font-size:.78rem;text-align:center;margin-bottom:14px}
+
+.mb10{margin-bottom:10px}
+.mt10{margin-top:10px}
+.spin{display:inline-block;animation:spin 1s linear infinite}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L15 9H22L16 14L19 21L12 16.5L5 21L8 14L2 9H9L12 2Z"/></svg>
+    </div>
+    <div class="brand-name" id="siteName">Musu ✿</div>
+  </div>
+  <div class="topbar-btns">
+    <button class="tbtn tbtn-how" id="howtoBtn">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Tutorial
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- PAGE: HOME (APPLY) -->
+  <div id="page-home" class="page active">
+    
+    <!-- EAT / Access Token Card -->
+    <div class="card">
+      <div class="sec-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        EAT / Access Token
+        <span class="badge" id="tokenBadge">Not Set</span>
+      </div>
+      
+      <button class="btn btn-primary mb10" onclick="window.open('https://ticket.kiosgamer.co.id/', '_blank')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Get EAT Token
+      </button>
+      
+      <div class="token-row">
+        <input type="text" id="tokenInput" class="inp" placeholder="Paste EAT or Access Token here…" oninput="onTokenInput()">
+        <button class="paste-btn" onclick="pasteToken()" title="Paste">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+        </button>
+      </div>
+      <div id="fetchingInfo" style="display:none;text-align:center;padding:8px;color:var(--txt3);font-size:.75rem;">
+        <span class="spin">&#8635;</span> Fetching player info…
+      </div>
+      <div id="playerInfo" class="info-box" style="display:none;">
+        <div class="info-row"><span class="info-key">UID</span><span class="info-val" id="pUID">—</span></div>
+        <div class="info-row"><span class="info-key">Region</span><span class="info-val" id="pRegion">—</span></div>
+      </div>
+    </div>
+
+    <!-- Bio Text Card -->
+    <div class="card">
+      <div class="sec-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+        Bio Text
+        <span class="badge">Max 300</span>
+      </div>
+      <textarea id="homeBioText" class="textarea-bio" spellcheck="false" maxlength="300" placeholder="Type your dream bio here…" oninput="updateHomePrev()"></textarea>
+      <div class="char-bar"><span id="homeCharCount">0 / 300</span></div>
+    </div>
+
+    <!-- Preview Card -->
+    <div class="card">
+      <div class="sec-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Preview
+      </div>
+      <div class="bio-preview" id="homeBioPreview">
+        <div class="bio-empty">✨ Type bio above to preview… ✨</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary mb10" id="applyBtn" onclick="applyBio()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Apply Bio to Free Fire
+    </button>
+    <button class="btn btn-secondary" onclick="copyBioText()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Copy Bio Text
+    </button>
+    
+    <button class="btn btn-create-site mt10" onclick="openCreateSite()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      Create Your Own Site
+    </button>
+  </div>
+
+  <!-- PAGE: EDITOR -->
+  <div id="page-editor" class="page">
+    <div class="card">
+      <div class="sec-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        Format Tags
+      </div>
+      <div class="fmt-row">
+        <button class="fmt-btn" onclick="ins('[b]')"><b>B</b></button>
+        <button class="fmt-btn" onclick="ins('[/b]')"><b>/B</b></button>
+        <button class="fmt-btn" onclick="ins('[i]')"><i>I</i></button>
+        <button class="fmt-btn" onclick="ins('[/i]')"><i>/I</i></button>
+        <button class="fmt-btn" onclick="ins('[u]')"><u>U</u></button>
+        <button class="fmt-btn" onclick="ins('[/u]')"><u>/U</u></button>
+        <button class="fmt-btn" onclick="ins('[c]')">C</button>
+        <button class="fmt-btn" onclick="ins('[/c]')">C/</button>
+      </div>
+      <textarea id="bioText" class="textarea-bio" spellcheck="false" maxlength="300" placeholder="[b][c][FF69B4]Your [FFB6C1]beautiful bio…" oninput="updateEditorPrev()"></textarea>
+      <div class="char-bar"><span id="editorCharCount">0 / 300</span></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+        V Badge — tap to insert
+      </div>
+      <div class="vbadge-row" id="vBadgeRow"></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+        Colors — tap to insert
+      </div>
+      <div class="color-grid" id="colorGrid"></div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <input type="color" id="customColor" value="#ff69b4" style="width:36px;height:36px;border:none;background:none;cursor:pointer;border-radius:12px;">
+        <button class="fmt-btn" style="flex:1;" onclick="insertCustomColor()">+ Custom Color</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Gradient Presets
+      </div>
+      <div class="grad-list" id="gradList"></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Live Preview
+      </div>
+      <div class="bio-preview" id="editorBioPreview">
+        <div class="bio-empty">✨ Type above to preview… ✨</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary mb10" onclick="sendToHome()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Use This Bio — Go to Apply
+    </button>
+    <button class="btn btn-secondary" onclick="clearEditor()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      Clear Editor
+    </button>
+    
+    <button class="btn btn-create-site mt10" onclick="openCreateSite()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      Create Your Own Site
+    </button>
+  </div>
+
+  <!-- PAGE: TEMPLATES -->
+  <div id="page-templates" class="page">
+    <div class="card">
+      <div class="sec-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Bio Templates
+        <span class="badge">Tap to Use</span>
+      </div>
+      <p style="font-size:.75rem;color:var(--txt3);margin-bottom:10px;">💕 Tap any template to load it on the Apply tab</p>
+    </div>
+    <div class="tpl-list" id="templateList"></div>
+    
+    <button class="btn btn-create-site mt10" onclick="openCreateSite()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      Create Your Own Site
+    </button>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <button class="bnav-item active" onclick="switchPage('home')">
+    <div class="nav-pip"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+    <span class="nav-lbl">Apply</span>
+  </button>
+  <button class="bnav-item" onclick="switchPage('editor')">
+    <div class="nav-pip"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+    <span class="nav-lbl">Editor</span>
+  </button>
+  <button class="bnav-item" onclick="switchPage('templates')">
+    <div class="nav-pip"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+    <span class="nav-lbl">Templates</span>
+  </button>
+</nav>
+
+<!-- MODALS -->
+<div class="modal-bg" id="successModal">
+  <div class="modal-box">
+    <div class="modal-title">✨ SUCCESS! ✨</div>
+    <div class="modal-sub">Bio updated in Free Fire ✓</div>
+    <div class="info-box" style="margin-bottom:12px;">
+      <div class="info-row"><span class="info-key">UID</span><span class="info-val" id="mo-uid">—</span></div>
+      <div class="info-row"><span class="info-key">Region</span><span class="info-val" id="mo-region">—</span></div>
+    </div>
+    <div class="bio-preview" id="mo-bio" style="margin-bottom:16px;min-height:50px;"></div>
+    <button class="btn btn-success" onclick="closeModal('successModal')">💖 Awesome! 💖</button>
+  </div>
+</div>
+
+<!-- Welcome Popup -->
+<div class="modal-bg" id="welcomeModal">
+  <div class="modal-box" style="text-align:center;">
+    <div style="display:flex;justify-content:center;gap:20px;margin-bottom:15px;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="#FF0000">
+        <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"/>
+        <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#FFFFFF"/>
+      </svg>
+      <svg width="48" height="48" viewBox="0 0 24 24">
+        <defs>
+          <linearGradient id="instaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#fdf497"/>
+            <stop offset="20%" style="stop-color:#fdf497"/>
+            <stop offset="40%" style="stop-color:#fd5949"/>
+            <stop offset="60%" style="stop-color:#d6249f"/>
+            <stop offset="80%" style="stop-color:#285aeb"/>
+            <stop offset="100%" style="stop-color:#285aeb"/>
+          </linearGradient>
+        </defs>
+        <rect x="2" y="2" width="20" height="20" rx="4" fill="url(#instaGrad)"/>
+        <circle cx="12" cy="12" r="4" fill="none" stroke="#FFFFFF" stroke-width="1.5"/>
+        <circle cx="17.5" cy="6.5" r="1.5" fill="#FFFFFF"/>
+      </svg>
+    </div>
+    <div class="modal-title" id="welcomeTitle">✿ JOIN THE FAMILY ✿</div>
+    <div class="modal-sub" id="welcomeMsg">Follow to unlock Bio Injector!</div>
+    <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px;" id="welcomeBtns"></div>
+    <div style="margin-top:12px;">
+      <button id="continueBtn" class="btn btn-secondary" style="opacity:0.5;" disabled onclick="continueToSite()">Continue →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CFG = {{ config | tojson }};
+
+// V Badges, Colors, Gradients
+const V_BADGES = [
+  {hex:"ffd319",name:"Golden"},{hex:"ff0000",name:"Red"},{hex:"ff00ae",name:"Pink"},
+  {hex:"b400ff",name:"Violet"},{hex:"0600ff",name:"Blue"},{hex:"00ff00",name:"Green"},
+  {hex:"FFFF00",name:"Yellow"},{hex:"00ccff",name:"LtBlue"},{hex:"bfff6d",name:"Parrot"},
+  {hex:"FF8800",name:"Orange"},{hex:"FFD700",name:"Gold"},{hex:"800080",name:"Purple"},
+  {hex:"00FFFF",name:"Cyan"},{hex:"FFFFFF",name:"White"}
+];
+
+const COLORS = [
+  "FF69B4","FFB6C1","FF1493","DA70D6","C71585","DB7093",
+  "FF0000","FF4500","FF8C00","FFD700","FFFF00","BFFF00",
+  "00FF00","00FFFF","00BBFF","0000FF","8B00FF","FF00FF",
+  "FFFFFF","C0C0C0","000000"
+];
+
+const GRADIENTS = [
+  {name:"💕 Pink Dream", code:"[FF69B4]YOUR [FFB6C1]NAME"},
+  {name:"💜 Purple Haze", code:"[9370DB]YOUR [DA70D6]NAME"},
+  {name:"✨ Royal Gold", code:"[FFD700]YOUR [FFFFFF]NAME"},
+  {name:"🌈 Rainbow", code:"[FF0000]Y[FF4500]O[FFFF00]U[00FF00]R[0000FF] [8B00FF]NAME"},
+  {name:"🌸 Sakura", code:"[FFB6C1]YOUR [FF69B4]NAME"},
+  {name:"🌙 Moonlight", code:"[C71585]YOUR [DB7093]NAME"}
+];
+
+// Boot
+(function(){
+  document.getElementById('siteName').textContent = CFG.site_name || "Musu ✿";
+  
+  const howtoBtn = document.getElementById('howtoBtn');
+  if(CFG.howto_video_link) howtoBtn.onclick = () => window.open(CFG.howto_video_link, '_blank');
+  
+  // V Badges
+  const vRow = document.getElementById('vBadgeRow');
+  V_BADGES.forEach(v => {
+    let c = document.createElement('div');
+    c.className = 'vb-chip';
+    c.innerHTML = `<span style="color:#${v.hex};font-size:1.1rem;font-weight:bold;">Ⓥ</span><span class="vlbl">${v.name}</span>`;
+    c.onclick = () => ins(`[b][c][${v.hex}]Ⓥ[/c][/b]`);
+    vRow.appendChild(c);
+  });
+  
+  // Colors
+  const cGrid = document.getElementById('colorGrid');
+  COLORS.forEach(hex => {
+    let chip = document.createElement('div');
+    chip.className = 'color-dot';
+    chip.style.background = '#' + hex;
+    chip.onclick = () => ins(`[c][${hex}]`);
+    cGrid.appendChild(chip);
+  });
+  
+  // Gradients
+  const gList = document.getElementById('gradList');
+  GRADIENTS.forEach(g => {
+    let chip = document.createElement('div');
+    chip.className = 'grad-chip';
+    chip.textContent = g.name;
+    chip.onclick = () => ins(g.code);
+    gList.appendChild(chip);
+  });
+  
+  // Templates from config
+  const tList = document.getElementById('templateList');
+  if(CFG.templates && CFG.templates.length) {
+    CFG.templates.forEach(t => {
+      let card = document.createElement('div');
+      card.className = 'tpl-card';
+      let previewHtml = parseBio(t.bio);
+      card.innerHTML = `<div class="tpl-name">${t.name}</div><div class="tpl-preview">${previewHtml}</div><div class="tpl-tag">💕 Tap to use</div>`;
+      card.onclick = () => useTemplate(t.bio);
+      tList.appendChild(card);
+    });
+  }
+  
+  // Welcome popup
+  if(CFG.popup_title && !sessionStorage.getItem('wc_shown')){
+    sessionStorage.setItem('wc_shown','1');
+    document.getElementById('welcomeTitle').textContent = CFG.popup_title || "✿ JOIN THE FAMILY ✿";
+    document.getElementById('welcomeMsg').textContent = CFG.popup_message || "Follow to unlock Bio Injector!";
+    const wBtns = document.getElementById('welcomeBtns');
+    let ytClicked = false, igClicked = false;
+    if(CFG.youtube_link) {
+      let ytBtn = document.createElement('button');
+      ytBtn.className = 'btn btn-primary';
+      ytBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right:5px"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#FFFFFF"/></svg> Subscribe on YouTube 💕';
+      ytBtn.onclick = () => { window.open(CFG.youtube_link, '_blank'); ytClicked = true; checkBoth(); };
+      wBtns.appendChild(ytBtn);
+    }
+    if(CFG.instagram_link) {
+      let igBtn = document.createElement('button');
+      igBtn.className = 'btn btn-primary';
+      igBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right:5px"><rect x="2" y="2" width="20" height="20" rx="4" fill="url(#instaGradSmall)"/><circle cx="12" cy="12" r="4" fill="none" stroke="#FFFFFF" stroke-width="1.5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#FFFFFF"/><defs><linearGradient id="instaGradSmall" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fdf497"/><stop offset="40%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="100%" stop-color="#285aeb"/></linearGradient></defs></svg> Follow on Instagram ✨';
+      igBtn.onclick = () => { window.open(CFG.instagram_link, '_blank'); igClicked = true; checkBoth(); };
+      wBtns.appendChild(igBtn);
+    }
+    function checkBoth() {
+      if(ytClicked && igClicked) {
+        document.getElementById('continueBtn').style.opacity = '1';
+        document.getElementById('continueBtn').disabled = false;
+      }
+    }
+    setTimeout(() => openModal('welcomeModal'), 500);
+  }
+})();
+
+let currentJwtToken = null;
+let currentAccountInfo = null;
+let currentRegion = "ind";
+
+function switchPage(p){
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.bnav-item').forEach(el => el.classList.remove('active'));
+  if(p === 'home') document.querySelectorAll('.bnav-item')[0].classList.add('active');
+  if(p === 'editor') document.querySelectorAll('.bnav-item')[1].classList.add('active');
+  if(p === 'templates') document.querySelectorAll('.bnav-item')[2].classList.add('active');
+}
+
+function continueToSite() { closeModal('welcomeModal'); }
+
+function openCreateSite() {
+  if(CFG.create_own_video_link) {
+    window.open(CFG.create_own_video_link, '_blank');
+  } else {
+    toast('Link not configured');
+  }
+}
+
+function onTokenInput(){
+  let v = document.getElementById('tokenInput').value.trim();
+  if(v.length > 10){
+    document.getElementById('tokenBadge').textContent = 'Set';
+    document.getElementById('tokenBadge').className = 'badge badge-ok';
+    clearTimeout(window._fetchTimer);
+    window._fetchTimer = setTimeout(()=>fetchPlayer(v), 900);
+  } else {
+    document.getElementById('tokenBadge').textContent = 'Not Set';
+    document.getElementById('tokenBadge').className = 'badge';
+    document.getElementById('playerInfo').style.display = 'none';
+  }
+}
+
+async function fetchPlayer(token){
+  document.getElementById('fetchingInfo').style.display = 'block';
+  document.getElementById('playerInfo').style.display = 'none';
+  try{
+    let res = await fetch('/api/verify-token', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({eat_token: token})
+    });
+    let d = await res.json();
+    document.getElementById('fetchingInfo').style.display = 'none';
+    if(d.success){
+      currentJwtToken = d.jwt_token;
+      currentAccountInfo = d.account;
+      currentRegion = d.account.region ? d.account.region.toLowerCase() : "ind";
+      document.getElementById('pUID').textContent = d.account.uid || '—';
+      document.getElementById('pRegion').textContent = d.account.region ? d.account.region.toUpperCase() : '—';
+      document.getElementById('playerInfo').style.display = 'block';
+      toast('💖 Player info loaded!');
+    } else {
+      toast('Error: ' + (d.error || 'Invalid token'));
+    }
+  } catch(e){
+    document.getElementById('fetchingInfo').style.display = 'none';
+    toast('Failed to fetch player info');
+  }
+}
+
+async function pasteToken(){
+  try{ 
+    let t = await navigator.clipboard.readText(); 
+    document.getElementById('tokenInput').value = t; 
+    onTokenInput(); 
+    toast('✨ Token pasted!'); 
+  } catch(e){ 
+    toast('Long-press to paste'); 
+  }
+}
+
+function updateHomePrev(){
+  let v = document.getElementById('homeBioText').value;
+  document.getElementById('homeCharCount').textContent = v.length + ' / 300';
+  let p = document.getElementById('homeBioPreview');
+  p.innerHTML = v.trim() ? parseBio(v) : '<div class="bio-empty">✨ Type bio above to preview… ✨</div>';
+}
+
+function copyBioText(){
+  let v = document.getElementById('homeBioText').value;
+  if(!v){ toast('No bio to copy!'); return; }
+  navigator.clipboard.writeText(v).then(()=>toast('📋 Bio copied!'));
+}
+
+async function applyBio(){
+  let token = document.getElementById('tokenInput').value.trim();
+  let bio = document.getElementById('homeBioText').value.trim();
+  let region = currentRegion || "ind";
+  
+  if(!token){ toast('💕 Paste your Token first!'); return; }
+  if(!bio){ toast('✨ Enter a bio first!'); return; }
+  
+  let btn = document.getElementById('applyBtn');
+  let orig = btn.innerHTML;
+  btn.innerHTML = '<span class="spin">⟳</span> Applying...';
+  btn.disabled = true;
+  
+  try{
+    let jwt = currentJwtToken;
+    if(!jwt){
+      let verifyRes = await fetch('/api/verify-token', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({eat_token: token})
+      });
+      let verifyData = await verifyRes.json();
+      if(!verifyData.success) throw new Error(verifyData.error);
+      jwt = verifyData.jwt_token;
+      currentAccountInfo = verifyData.account;
+      currentRegion = verifyData.account.region ? verifyData.account.region.toLowerCase() : "ind";
+      region = currentRegion;
+    }
+    
+    let res = await fetch('/api/update-bio', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({jwt_token: jwt, bio: bio, region: region})
+    });
+    let d = await res.json();
+    
+    if(d.success){
+      document.getElementById('mo-uid').textContent = currentAccountInfo?.uid || '—';
+      document.getElementById('mo-region').textContent = (region || 'IND').toUpperCase();
+      document.getElementById('mo-bio').innerHTML = parseBio(bio);
+      openModal('successModal');
+      toast('🎀 Bio updated successfully!');
+    } else {
+      toast('Failed: ' + (d.error || 'Unknown error'));
+    }
+  } catch(e){ 
+    toast('Error: ' + e.message); 
+  } finally{ 
+    btn.innerHTML = orig; 
+    btn.disabled = false; 
+  }
+}
+
+function ins(tag){
+  let ta = document.getElementById('bioText');
+  let s = ta.selectionStart, e = ta.selectionEnd, v = ta.value;
+  let nv = v.slice(0,s) + tag + v.slice(e);
+  if(nv.length > 300){ toast('Bio too long!'); return; }
+  ta.value = nv;
+  ta.selectionStart = ta.selectionEnd = s + tag.length;
+  ta.focus();
+  updateEditorPrev();
+}
+
+function insertCustomColor(){
+  let hex = document.getElementById('customColor').value.replace('#','').toUpperCase();
+  ins(`[c][${hex}]`);
+}
+
+function clearEditor(){
+  document.getElementById('bioText').value = '';
+  updateEditorPrev();
+  toast('✨ Cleared');
+}
+
+function updateEditorPrev(){
+  let v = document.getElementById('bioText').value;
+  document.getElementById('editorCharCount').textContent = v.length + ' / 300';
+  let p = document.getElementById('editorBioPreview');
+  p.innerHTML = v.trim() ? parseBio(v) : '<div class="bio-empty">✨ Type above to preview… ✨</div>';
+}
+
+function sendToHome(){
+  let v = document.getElementById('bioText').value;
+  document.getElementById('homeBioText').value = v;
+  updateHomePrev();
+  switchPage('home');
+  toast('💖 Bio loaded — Apply now!');
+}
+
+function useTemplate(raw){
+  document.getElementById('homeBioText').value = raw;
+  document.getElementById('bioText').value = raw;
+  updateHomePrev();
+  updateEditorPrev();
+  switchPage('home');
+  toast('🌸 Template loaded!');
+}
+
+function parseBio(raw){
+  let s = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  s = s.replace(/\[c\]\[([a-fA-F0-9]{6})\]/gi,'[$1]').replace(/\[\/c\]/gi,'').replace(/\[c\]/gi,'');
+  s = s.replace(/\[b\]/gi,'<b>').replace(/\[\/b\]/gi,'</b>').replace(/\[i\]/gi,'<i>').replace(/\[\/i\]/gi,'</i>').replace(/\[u\]/gi,'<u>').replace(/\[\/u\]/gi,'</u>');
+  let parts = s.split(/(\[[a-fA-F0-9]{6}\])/gi);
+  let html = '', open = false;
+  parts.forEach(p => {
+    let m = p.match(/^\[([a-fA-F0-9]{6})\]$/i);
+    if(m){ if(open) html+='</span>'; open=true; html+=`<span style="color:#${m[1].toUpperCase()}">`; }
+    else html += p.replace(/\n/g,'<br>');
+  });
+  if(open) html+='</span>';
+  return html;
+}
+
+function openModal(id){ document.getElementById(id).classList.add('show'); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
+let _tt;
+function toast(msg){
+  let t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.top = '54px';
+  clearTimeout(_tt);
+  _tt = setTimeout(() => { t.style.top = '-55px'; }, 2800);
+}
+</script>
+</body>
+</html>
