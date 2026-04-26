@@ -1,13 +1,10 @@
 from flask import Flask, request, jsonify, render_template
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
-from google.protobuf import descriptor as _descriptor
-from google.protobuf import descriptor_pool as _descriptor_pool
-from google.protobuf import symbol_database as _symbol_database
-from google.protobuf.internal import builder as _builder
 import requests
 import re
 import urllib.parse
+import base64
 
 app = Flask(__name__)
 
@@ -21,15 +18,15 @@ except ImportError:
         "site_name": "Musu ✿",
         "site_logo_emoji": "✿",
         "freefire_version": "OB53",
-        "youtube_link": "https://youtube.com",
-        "instagram_link": "https://instagram.com",
+        "youtube_link": "https://youtube.com/@muskangaming18",
+        "instagram_link": "https://www.instagram.com/muskan_gaming18",
         "telegram_link": "https://t.me/MUSUKITEAM",
         "popup_title": "✿ JOIN THE FAMILY ✿",
         "popup_message": "Follow us!",
-        "bio_char_limit": 280,
+        "bio_char_limit": 300,
         "default_region": "IND",
         "footer_text": "Musu ✿ Bio Tool",
-        "howto_youtube_link": "https://youtu.be/your-tutorial",
+        "howto_youtube_link": "https://youtube.com/@muskangaming18",
         "howto_button_text": "📺 Watch Tutorial",
         "create_own_site_link": "https://youtube.com/@muskangaming18",
         "templates": [],
@@ -41,15 +38,54 @@ except ImportError:
 
 app.config['SITE_CONFIG'] = SITE_CONFIG
 
-# Protobuf setup
-_sym_db = _symbol_database.Default()
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\ndata.proto\"\xbb\x01\n\x04\x44\x61ta\x12\x0f\n\x07\x66ield_2\x18\x02 \x01(\x05\x12\x1e\n\x07\x66ield_5\x18\x05 \x01(\x0b\x32\r.EmptyMessage\x12\x1e\n\x07\x66ield_6\x18\x06 \x01(\x0b\x32\r.EmptyMessage\x12\x0f\n\x07\x66ield_8\x18\x08 \x01(\t\x12\x0f\n\x07\x66ield_9\x18\t \x01(\x05\x12\x1f\n\x08\x66ield_11\x18\x0b \x01(\x0b\x32\r.EmptyMessage\x12\x1f\n\x08\x66ield_12\x18\x0c \x01(\x0b\x32\r.EmptyMessage\"\x0e\n\x0c\x45mptyMessageb\x06proto3')
-_globals = globals()
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'data1_pb2', _globals)
+# Simple protobuf alternative - using manual byte construction
+def create_protobuf_data(bio_text):
+    """
+    Manually create the protobuf data structure
+    This avoids complex protobuf dependencies
+    """
+    # Simple structure: field_2=17, field_8=bio, field_9=1
+    bio_bytes = bio_text.encode('utf-8')
+    
+    # Build a simple protobuf-like structure
+    # Field 2 (varint 17)
+    data = bytearray()
+    
+    # field_2 = 17 (tag 2, varint)
+    data.extend([0x10, 0x11])  # tag 2 (field number 2 << 3 | 0 = 16) + value 17
+    
+    # field_5 = empty message
+    data.extend([0x2a, 0x00])  # tag 5 (field number 5 << 3 | 2 = 42) + length 0
+    
+    # field_6 = empty message  
+    data.extend([0x32, 0x00])  # tag 6 (field number 6 << 3 | 2 = 50) + length 0
+    
+    # field_8 = bio text
+    tag_8 = 0x42  # field number 8 << 3 | 2 = 66
+    data.extend([tag_8])
+    data.extend(_encode_length(len(bio_bytes)))
+    data.extend(bio_bytes)
+    
+    # field_9 = 1
+    data.extend([0x48, 0x01])  # tag 9 (field number 9 << 3 | 0 = 72) + value 1
+    
+    # field_11 = empty message
+    data.extend([0x5a, 0x00])  # tag 11 (field number 11 << 3 | 2 = 90) + length 0
+    
+    # field_12 = empty message
+    data.extend([0x62, 0x00])  # tag 12 (field number 12 << 3 | 2 = 98) + length 0
+    
+    return bytes(data)
 
-Data = _sym_db.GetSymbol('Data')
-EmptyMessage = _sym_db.GetSymbol('EmptyMessage')
+def _encode_length(length):
+    """Encode length for protobuf"""
+    if length < 128:
+        return bytes([length])
+    result = bytearray()
+    while length > 0:
+        result.append(length & 0x7F)
+        length >>= 7
+    return bytes(result)
 
 # Encryption keys
 key = bytes([89, 103, 38, 116, 99, 37, 68, 69, 117, 104, 54, 37, 90, 99, 94, 56])
@@ -108,16 +144,10 @@ def update_bio_with_jwt(jwt_token, bio_text, region):
         base_url = get_region_url(region)
         url_bio = f"{base_url}/UpdateSocialBasicInfo"
         
-        data = Data()
-        data.field_2 = 17
-        data.field_5.CopyFrom(EmptyMessage())
-        data.field_6.CopyFrom(EmptyMessage())
-        data.field_8 = bio_text.replace('+', ' ')
-        data.field_9 = 1
-        data.field_11.CopyFrom(EmptyMessage())
-        data.field_12.CopyFrom(EmptyMessage())
+        # Create protobuf data
+        data_bytes = create_protobuf_data(bio_text.replace('+', ' '))
         
-        data_bytes = data.SerializeToString()
+        # Encrypt
         padded_data = pad(data_bytes, AES.block_size)
         cipher = AES.new(key, AES.MODE_CBC, iv)
         encrypted_data = cipher.encrypt(padded_data)
@@ -149,6 +179,11 @@ def update_bio_with_jwt(jwt_token, bio_text, region):
         
     except Exception as e:
         raise Exception(str(e))
+
+def pad(data, block_size):
+    """Manual padding function"""
+    padding_len = block_size - (len(data) % block_size)
+    return data + bytes([padding_len] * padding_len)
 
 # Routes
 @app.route('/')
