@@ -1,40 +1,25 @@
 # config.py
 # ==================================================
 # MUSU FF BIO TOOL - FEMININE EDITION ✿
-# Edit these values to customize your site
 # ==================================================
 
 SITE_CONFIG = {
-    # Site Identity
     "site_name": "Musu ✿",
     "site_logo_emoji": "✿",
-    
-    # Free Fire Version
     "freefire_version": "OB53",
-    
-    # Social Links (for popup)
     "youtube_link": "https://youtube.com/@muskangaming18",
     "instagram_link": "https://www.instagram.com/muskan_gaming18",
-    
-    # Popup Settings
     "popup_title": "✿ JOIN THE FAMILY ✿",
     "popup_message": "Subscribe to YouTube & Follow on Instagram to unlock the Bio Injector!",
-    
-    # Bio Settings
     "bio_char_limit": 300,
     "default_region": "IND",
-    
-    # Footer
     "footer_text": "Musu ✿ • Dreamy Bio Editor",
-    
-    # Video Tutorial Links
     "howto_video_link": "https://youtube.com/@muskangaming18",
     "create_own_video_link": "https://youtube.com/@muskangaming18",
-
     "templates": [
         {
             "name": "✨ PRINCESS VIBE ✨",
-            "bio": "[B][C][I][FFB6C1]г…Ө в•ӯв”ҖвҺҫ Musu вҸӢ[FF69B4] вҶ“[FF1493]IG @musu[FFFFFF]вҶ“\nВ в•ӯв”ҳв–Јв”ӮбҙҖЙӘ бҙЎбҙҸКҖКҹбҙ…в”Ӯ[FFB6C1]YT - MUSU GAMING\n[FFC0CB][U]в””в—Һв”Җв”ҙв”Җв—Һв”Җв—Һ[/U]в”ҳ[FFB6C1]✨ FOLLOW FOR GIVEAWAYS ✨"
+            "bio": "[B][C][I][FFB6C1]✨ Musu ✨[FF69B4] 👑[FF1493]IG @musu[FFFFFF]\n[FFB6C1]YT - MUSU GAMING\n[FFB6C1]✨ FOLLOW FOR GIVEAWAYS ✨"
         },
         {
             "name": "🌸 DREAMY QUEEN 🌸",
@@ -46,7 +31,7 @@ SITE_CONFIG = {
         },
         {
             "name": "💖 PINK PANTHER 💖",
-            "bio": "[B][C][I][FF1493]Jo bich me aaya, uski lag gayi\n[FF69B4]Mera game hai next level\n[DB7093]Queen of the battlefield"
+            "bio": "[B][C][I][FF1493]Queen of the battlefield\n[FF69B4]Mera game hai next level\n[DB7093]Respect the queen ~"
         },
         {
             "name": "🌙 MOONLIGHT 🌙",
@@ -62,7 +47,7 @@ SITE_CONFIG = {
         },
         {
             "name": "🍰 SWEET KILLER 🍰",
-            "bio": "[B][C][I][FFB6C1]Sweet as candy, deadly as venom\n[FF69B4]One smile, one headshot\n[FFC0CB]That's my combo ~"
+            "bio": "[B][C][I][FFB6C1]Sweet as candy, deadly as venom\n[FF69B4]One smile, one headshot"
         },
         {
             "name": "✨ STARLIGHT ✨",
